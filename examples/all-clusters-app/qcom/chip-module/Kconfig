@@ -1,0 +1,58 @@
+#
+#   Copyright (c) 2021-2024 Project CHIP Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+# chip-module/ is one level below the qcom app root.
+# The Matter SDK root is four levels up.
+rsource "../../../../config/zephyr/Kconfig"
+
+# WiFi connection recovery configuration
+config CHIP_WIFI
+	bool "Enable Matter WiFi support"
+	depends on WIFI
+	default y if WIFI
+
+if CHIP_WIFI
+
+config CHIP_WIFI_CONNECTION_RECOVERY_MINIMUM_INTERVAL
+	int "Minimum connection recovery interval (ms)"
+	default 500
+
+config CHIP_WIFI_CONNECTION_RECOVERY_MAXIMUM_INTERVAL
+	int "Maximum connection recovery interval (ms)"
+	default 3600000
+
+config CHIP_WIFI_CONNECTION_RECOVERY_JITTER
+	int "Connection recovery jitter (ms)"
+	default 2000
+
+config CHIP_WIFI_CONNECTION_RECOVERY_MAX_RETRIES_NUMBER
+	int "Maximum connection recovery retries"
+	default 0
+
+endif # CHIP_WIFI
+
+# Read Client support
+config CHIP_ENABLE_READ_CLIENT
+	bool "Enable Matter Read Client"
+	default y
+	help
+	  Enable the Matter Read Client for attribute subscriptions and reads.
+
+# Redundant fix for getopt if not handled by zephyr/Kconfig
+config QCC730_FIX_GETOPT_MODULE
+    bool
+    default y
+    select TC_PROVIDES_POSIX_C_LIB_EXT

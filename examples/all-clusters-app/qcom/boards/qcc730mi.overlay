@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2024 Project CHIP Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/ {
+	chosen {
+		zephyr,settings-partition = &storage_partition;
+	};
+};
+
+/* 
+ * The QCC730MI dev kit uses qspi_nor_flash3 (GT25Q32AU, 4MB) by default.
+ * We define a fixed partition table here to allocate space for Matter's
+ * non-volatile storage (NVS) at the end of the flash.
+ */
+&qspi_nor_flash3 {
+	status = "okay";
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/*
+		 * Fix 6: Enlarged NVS storage partition — 64KB (was 32KB).
+		 *
+		 * Rationale: The default 32KB (8 sectors x 4KB) fills quickly
+		 * during Matter commissioning (RCAC 293B + NOC+ICAC+IPK 566B +
+		 * fabric metadata), triggering NVS garbage collection (sector
+		 * erase, up to 400ms each) multiple times. This caused:
+		 *   AddTrustedRootCert: 4.37s  (was ~0.1s expected)
+		 *   AddNOC:             9.10s  (was ~0.5s expected)
+		 *
+		 * With 64KB (16 sectors x 4KB), a full commissioning cycle
+		 * (~1KB of writes) fits without triggering any GC, reducing
+		 * NVS write time to ~50-100ms per operation.
+		 *
+		 * Layout:
+		 *   Size:  64KB (0x10000)
+		 *   Start: 0x400000 - 0x10000 = 0x3F0000
+		 *   App binary ends at ~0x338D0A — 760KB gap, safe.
+		 *
+		 * IMPORTANT: After flashing a build with this new partition,
+		 * always run 'matter reset' on the device to clear any NVS
+		 * data at the old address (0x3F8000).
+		 *
+		 * Matches CONFIG_SETTINGS_NVS_SECTOR_COUNT=16 in prj.conf.
+		 */
+		storage_partition: partition@3f0000 {
+			label = "storage";
+			reg = <0x003f0000 0x00010000>;
+		};
+	};
+};

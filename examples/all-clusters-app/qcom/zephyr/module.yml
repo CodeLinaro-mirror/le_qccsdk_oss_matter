@@ -1,0 +1,4 @@
+name: matter-qcc730-app
+build:
+  cmake: .
+  kconfig: Kconfig

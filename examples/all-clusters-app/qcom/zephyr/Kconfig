@@ -1,0 +1,59 @@
+# Matter (CHIP) Configuration for QCC730
+
+config CHIP
+	bool "Enable Matter (CHIP) support"
+	default y
+	help
+	  Enable Matter (Connected Home over IP) support for QCC730
+
+if CHIP
+
+config CHIP_DEVICE_VENDOR_ID
+	hex "Matter Vendor ID"
+	default 0xFFF1
+	help
+	  Vendor ID for Matter device
+
+config CHIP_DEVICE_PRODUCT_ID
+	hex "Matter Product ID"
+	default 0x8001
+	help
+	  Product ID for Matter device
+
+config CHIP_DEVICE_SOFTWARE_VERSION
+	int "Software Version"
+	default 1
+	help
+	  Software version number
+
+config CHIP_LOG_LEVEL_DBG
+	bool "Enable Matter debug logging"
+	default y
+	help
+	  Enable detailed debug logging for Matter stack
+
+config CHIP_ENABLE_WIFI
+	bool "Enable WiFi support"
+	default y
+	help
+	  Enable WiFi connectivity for Matter
+
+config CHIP_ENABLE_THREAD
+	bool "Enable Thread support"
+	default n
+	help
+	  Enable Thread connectivity for Matter
+
+config CHIP_ENABLE_BLE
+	bool "Enable BLE support"
+	default y
+	help
+	  Enable BLE for Matter commissioning
+
+endif # CHIP
+
+# Fix for multiple definition of getopt/optarg/etc. with Newlib
+config QCC730_FIX_GETOPT
+    bool "Fix getopt conflict with Newlib"
+    default y
+    select TC_PROVIDES_POSIX_C_LIB_EXT

@@ -16,7 +16,7 @@ import("//build_overrides/chip.gni")
 import("${chip_root}/src/ble/ble.gni")
 
 declare_args() {
-  # Device platform layer: cc13x4_26x4, cc32xx, darwin, efr32, esp32, external, freertos, linux, nrfconnect, nxp, qpg, tizen, cyw30739, bl602, zephyr, beken, none.
+  # Device platform layer: cc13x4_26x4, cc32xx, darwin, efr32, esp32, external, freertos, linux, nrfconnect, nxp, qpg, qcom, tizen, cyw30739, bl602, zephyr, beken, none.
 
   chip_device_platform = "auto"
   chip_platform_target = ""
@@ -72,6 +72,7 @@ declare_args() {
       chip_device_platform == "cc32xx" || chip_device_platform == "bl602" ||
       chip_device_platform == "beken" || chip_device_platform == "mt793x" ||
       chip_device_platform == "asr" ||
+      chip_device_platform == "qcom" ||
       (chip_device_platform == "darwin" && current_os == "mac")
 
   # Enable ethernet support
@@ -98,7 +99,8 @@ declare_args() {
       chip_device_platform == "psoc6" || chip_device_platform == "ameba" ||
       chip_device_platform == "webos" || chip_device_platform == "cc32xx" ||
       chip_device_platform == "beken" || chip_device_platform == "mt793x" ||
-      chip_device_platform == "asr" || chip_device_platform == "nuttx") {
+      chip_device_platform == "asr" || chip_device_platform == "nuttx" ||
+      chip_device_platform == "qcom") {
     chip_mdns = "minimal"
   } else if (chip_device_platform == "darwin" ||
              chip_device_platform == "cc13x4_26x4" || current_os == "android" ||
@@ -201,6 +203,8 @@ if (chip_device_platform == "cc13x4_26x4") {
   _chip_device_layer = "webos"
 } else if (chip_device_platform == "zephyr") {
   _chip_device_layer = "Zephyr"
+} else if (chip_device_platform == "qcom") {
+  _chip_device_layer = "qcom"
 } else if (chip_device_platform == "beken") {
   _chip_device_layer = "Beken"
 } else if (chip_device_platform == "mt793x") {
@@ -278,7 +282,7 @@ assert(
         chip_device_platform == "psoc6" || chip_device_platform == "android" ||
         chip_device_platform == "ameba" || chip_device_platform == "cyw30739" ||
         chip_device_platform == "webos" || chip_device_platform == "zephyr" ||
-        chip_device_platform == "beken" || chip_device_platform == "bl602" ||
+        chip_device_platform == "qcom" || chip_device_platform == "beken" || chip_device_platform == "bl602" ||
         chip_device_platform == "bl616" || chip_device_platform == "bl702" ||
         chip_device_platform == "bl702l" || chip_device_platform == "mt793x" ||
         chip_device_platform == "SiWx917" || chip_device_platform == "asr" ||

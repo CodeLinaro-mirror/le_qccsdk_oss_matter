@@ -1,0 +1,112 @@
+# Copyright (c) 2024 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Platform layer for Qualcomm QCC730MI (Zephyr RTOS, WiFi-only, no BLE/Thread).
+#
+# Architecture:
+#   - OS abstraction  : Zephyr (GenericPlatformManagerImpl_Zephyr)
+#   - WiFi driver     : qcom_wifi_drv raises standard Zephyr net_mgmt events;
+#                       the generic Zephyr WiFiManager / ZephyrWifiDriver handle them.
+#   - BLE             : not present on QCC730.
+#   - Thread          : not present on QCC730.
+#
+# Most source files are shared directly from src/platform/Zephyr/; only the
+# files that differ (ConnectivityManagerImpl, config headers) live here.
+
+import("//build_overrides/chip.gni")
+import("//build_overrides/zephyr.gni")
+
+import("${chip_root}/src/platform/device.gni")
+import("${chip_root}/src/platform/qcom/args.gni")
+
+assert(chip_device_platform == "qcom")
+
+static_library("qcom") {
+  sources = [
+    # Shared Zephyr platform sources (no BLE, no Thread variants needed).
+    "../SingletonConfigurationManager.cpp",
+    "../Zephyr/ConfigurationManagerImpl.cpp",
+    "ConfigurationManagerImpl.h",
+    "../Zephyr/DeviceInstanceInfoProviderImpl.cpp",
+    "DeviceInstanceInfoProviderImpl.h",
+    "../Zephyr/DiagnosticDataProviderImpl.cpp",
+    "DiagnosticDataProviderImpl.h",
+    "../Zephyr/InetUtils.cpp",
+    "../Zephyr/InetUtils.h",
+    "../Zephyr/KeyValueStoreManagerImpl.cpp",
+    "KeyValueStoreManagerImpl.h",
+    "../Zephyr/PlatformManagerImpl.cpp",
+    "../Zephyr/SysHeapMalloc.h",
+    "../Zephyr/SystemTimeSupport.cpp",
+    "../Zephyr/ZephyrConfig.cpp",
+    "../Zephyr/ZephyrConfig.h",
+
+    # QCC730-specific overrides.
+    "BlePlatformConfig.h",
+    "CHIPDevicePlatformConfig.h",
+    "CHIPDevicePlatformEvent.h",
+    "CHIPPlatformConfig.h",
+    "ConnectivityManagerImpl.cpp",
+    "ConnectivityManagerImpl.h",
+    "InetPlatformConfig.h",
+    "PlatformManagerImpl.h",
+    "SystemPlatformConfig.h",
+  ]
+
+  public_deps = [ "${chip_root}/src/platform:platform_base" ]
+
+  deps = [
+    "${chip_root}/src/app:app_config",
+    "${chip_root}/src/app/common:ids",
+    "${chip_root}/src/platform/logging:headers",
+  ]
+
+  # WiFi support: reuse the generic Zephyr WiFi layer plus the QCC730 driver wrapper.
+  if (chip_enable_wifi) {
+    sources += [
+      "../Zephyr/wifi/ConnectivityManagerImplWiFi.cpp",
+      "../Zephyr/wifi/ConnectivityManagerImplWiFi.h",
+      "../Zephyr/wifi/DiagnosticDataProviderImplWiFi.cpp",
+      "../Zephyr/wifi/DiagnosticDataProviderImplWiFi.h",
+      "../Zephyr/wifi/WiFiManager.cpp",
+      "../Zephyr/wifi/WiFiManager.h",
+      "../Zephyr/wifi/ZephyrWifiDriver.cpp",
+      "../Zephyr/wifi/ZephyrWifiDriver.h",
+      "wifi/QComWifiDriver.h",
+    ]
+  } else {
+    sources += [ "../Zephyr/DiagnosticDataProviderImplGetter.cpp" ]
+  }
+
+  if (chip_malloc_sys_heap) {
+    sources += [ "../Zephyr/SysHeapMalloc.cpp" ]
+  }
+
+  if (chip_enable_ota_requestor) {
+    sources += [
+      "../Zephyr/OTAImageProcessorImpl.cpp",
+      "../Zephyr/OTAImageProcessorImpl.h",
+    ]
+  }
+
+  cflags = [ "-Wconversion" ]
+}
+
+source_set("logging") {
+  deps = [
+    "${chip_root}/src/platform:platform_base",
+    "${chip_root}/src/platform/logging:headers",
+  ]
+  sources = [ "../Zephyr/Logging.cpp" ]
+}
