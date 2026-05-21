@@ -22,6 +22,21 @@
 #include <app/server/Server.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_CHIP_APP_LOG_LEVEL);
+// QCC730: override Zephyr's default sys_arch_reboot() which calls NVIC_SystemReset().
+// NVIC_SystemReset() only resets the Cortex-M33 core and does NOT clear RAM.
+// After a software reset, rram_udpart_init() (added in qhal commit e5dd04b) calls
+// qurt_mutex_create() again, but the QURT internal mutex table still holds the
+// previous session's state while the BSS handle was zeroed by arch_bss_zero(),
+// causing a deadlock in qapi_pmu_init() on the next boot.
+// nt_system_sw_reset() writes QWLAN_PMU_SYS_SOFT_RESET_REQ_REG which resets the
+// entire SoC (equivalent to a power cycle), clearing RAM and WiFi FW state cleanly.
+extern "C" void nt_system_sw_reset(void);
+
+extern "C" void sys_arch_reboot(int type)
+{
+    ARG_UNUSED(type);
+    nt_system_sw_reset();
+}
 
 using namespace ::chip;
 

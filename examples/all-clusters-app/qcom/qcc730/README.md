@@ -3,13 +3,10 @@
 Matter SDK v1.5 all-clusters application for the Qualcomm QCC730MI SoC
 (Cortex-M33 @80 MHz, Zephyr RTOS, WiFi-only, no BLE/Thread).
 
-**This directory is copied into the Matter SDK by `setup.py apply`.**
-Do not build directly from the QCC730 SDK location.
-
 ## Build
 
 ```bash
-# From connectedhomeip/examples/all-clusters-app/qcom/ (after setup.py apply):
+# From connectedhomeip/examples/all-clusters-app/qcom/qcc730/:
 source setup_env.sh
 ./build.sh
 # Output: build/zephyr/zephyr_HASHED.elf

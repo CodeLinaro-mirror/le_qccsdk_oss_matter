@@ -69,13 +69,12 @@ if [ -n "$2" ]; then
 elif [ -n "$ZEPHYR_SDK_INSTALL_DIR" ] && [ -d "$ZEPHYR_SDK_INSTALL_DIR" ]; then
     SDK_INPUT="$ZEPHYR_SDK_INSTALL_DIR"
 else
-    # Try common locations silently
+    # Try common locations silently (glob for any zephyr-sdk-* version)
     SDK_INPUT=""
     for candidate in \
-        "/local/mnt/workspace/wangson/tools/zephyr-sdk-0.17.4" \
-        "$HOME/zephyr-sdk-0.17.4" \
-        "/opt/zephyr-sdk-0.17.4" \
-        "/usr/local/zephyr-sdk-0.17.4"; do
+        "$HOME/zephyr-sdk-"* \
+        "/opt/zephyr-sdk-"* \
+        "/usr/local/zephyr-sdk-"*; do
         if [ -d "$candidate" ]; then
             SDK_INPUT="$candidate"
             break

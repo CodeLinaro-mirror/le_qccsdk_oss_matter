@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Common GN build arguments shared by all Qualcomm Zephyr-based Matter chips.
-# Chip-specific args (chip_device_platform, chip_enable_wifi, etc.) are in
-# the per-chip args.gni (e.g. QCC730/args.gni).
+# GN build arguments for the QCC730 chip (Cortex-M33, Zephyr RTOS, WiFi-only).
+
+chip_device_platform = "qcom"
+
+chip_enable_wifi = true
+chip_enable_ble  = false
+
+chip_mdns = "minimal"
 
 declare_args() {
-  # Use Zephyr sys_heap for chip::Platform::MemoryAlloc (recommended for
-  # Zephyr-based platforms to avoid fragmentation).
+  # Use Zephyr sys_heap for chip::Platform::MemoryAlloc.
   chip_malloc_sys_heap = false
 }

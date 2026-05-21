@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Common GN build arguments shared by all Qualcomm Zephyr-based Matter chips.
-# Chip-specific args (chip_device_platform, chip_enable_wifi, etc.) are in
-# the per-chip args.gni (e.g. QCC730/args.gni).
-
-declare_args() {
-  # Use Zephyr sys_heap for chip::Platform::MemoryAlloc (recommended for
-  # Zephyr-based platforms to avoid fragmentation).
-  chip_malloc_sys_heap = false
-}
+# Shared platform sources for all Qualcomm Zephyr-based Matter chips.
+# Sources are consumed directly by the chip-specific BUILD.gn in the
+# parent directory (src/platform/qcom/BUILD.gn).
+# No build targets are defined here; this directory is header-only from
+# GN's perspective.

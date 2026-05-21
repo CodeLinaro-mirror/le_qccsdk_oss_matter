@@ -16,7 +16,7 @@
 
 # chip-module/ is one level below the qcom app root.
 # The Matter SDK root is four levels up.
-rsource "../../../../config/zephyr/Kconfig"
+rsource "../../../../../config/zephyr/Kconfig"
 
 # WiFi connection recovery configuration
 config CHIP_WIFI

@@ -5,7 +5,7 @@ if(CONFIG_CHIP)
     include(ExternalProject)
 
     if(NOT CHIP_ROOT)
-        get_filename_component(CHIP_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../.. REALPATH)
+        get_filename_component(CHIP_ROOT ${CMAKE_CURRENT_LIST_DIR}/../../../../.. REALPATH)
     endif()
 
     include(${CHIP_ROOT}/config/zephyr/zephyr-util.cmake)
@@ -13,7 +13,7 @@ if(CONFIG_CHIP)
     # QCC730: use the qcom-specific GN args (chip_device_platform = "qcom").
     # Falls back to the generic Zephyr chip-gn directory for toolchain/BUILD.gn.
     get_filename_component(GN_ROOT_TARGET ${CHIP_ROOT}/config/zephyr/chip-gn REALPATH)
-    get_filename_component(QCC730_GN_ARGS  ${CHIP_ROOT}/config/qcom/chip-gn/args.gni REALPATH)
+    get_filename_component(QCC730_GN_ARGS  ${CHIP_ROOT}/src/platform/qcom/QCC730/args.gni REALPATH)
     get_filename_component(COMMON_CMAKE_SOURCE_DIR ${CHIP_ROOT}/config/common/cmake REALPATH)
 
     include(${COMMON_CMAKE_SOURCE_DIR}/chip_gn_args.cmake)

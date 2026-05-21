@@ -14,8 +14,8 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
-# CHIP_ROOT is the connectedhomeip SDK root (3 levels up from qcom/).
-get_filename_component(CHIP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../.. REALPATH)
+# CHIP_ROOT is the connectedhomeip SDK root (4 levels up from qcc730/).
+get_filename_component(CHIP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../.. REALPATH)
 get_filename_component(GEN_DIR ${CHIP_ROOT}/zzz_generated/ REALPATH)
 get_filename_component(ALL_CLUSTERS_COMMON_DIR ${CHIP_ROOT}/examples/all-clusters-app/all-clusters-common REALPATH)
 
