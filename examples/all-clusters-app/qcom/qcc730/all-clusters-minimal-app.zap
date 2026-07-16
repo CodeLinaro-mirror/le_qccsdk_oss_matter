@@ -78,7 +78,7 @@
           "mfgCode": null,
           "define": "GROUPS_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "commands": [
             {
               "name": "AddGroup",
@@ -1006,7 +1006,7 @@
           "mfgCode": null,
           "define": "OTA_SOFTWARE_UPDATE_REQUESTOR_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "commands": [
             {
               "name": "AnnounceOTAProvider",
@@ -1145,7 +1145,7 @@
           "mfgCode": null,
           "define": "LOCALIZATION_CONFIGURATION_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "ActiveLocale",
@@ -1267,7 +1267,7 @@
           "mfgCode": null,
           "define": "TIME_FORMAT_LOCALIZATION_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "HourFormat",
@@ -1373,7 +1373,7 @@
           "mfgCode": null,
           "define": "UNIT_LOCALIZATION_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "GeneratedCommandList",
@@ -1463,7 +1463,7 @@
           "mfgCode": null,
           "define": "POWER_SOURCE_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "Status",
@@ -2177,7 +2177,7 @@
           "mfgCode": null,
           "define": "DIAGNOSTIC_LOGS_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "commands": [
             {
               "name": "RetrieveLogsRequest",
@@ -2425,7 +2425,7 @@
           "mfgCode": null,
           "define": "SOFTWARE_DIAGNOSTICS_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "FeatureMap",
@@ -2781,7 +2781,7 @@
           "mfgCode": null,
           "define": "WIFI_NETWORK_DIAGNOSTICS_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "BSSID",
@@ -3767,7 +3767,7 @@
           "mfgCode": null,
           "define": "FIXED_LABEL_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "LabelList",
@@ -3825,7 +3825,7 @@
           "mfgCode": null,
           "define": "USER_LABEL_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "LabelList",
@@ -4153,7 +4153,7 @@
           "mfgCode": null,
           "define": "GROUPS_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "commands": [
             {
               "name": "AddGroup",
@@ -5733,7 +5733,7 @@
           "mfgCode": null,
           "define": "SCENES_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "apiMaturity": "provisional",
           "commands": [
             {
@@ -6819,7 +6819,7 @@
           "mfgCode": null,
           "define": "COLOR_CONTROL_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "ColorMode",
@@ -7562,7 +7562,7 @@
           "mfgCode": null,
           "define": "OCCUPANCY_SENSING_CLUSTER",
           "side": "server",
-          "enabled": 1,
+          "enabled": 0,
           "attributes": [
             {
               "name": "Occupancy",
@@ -11476,14 +11476,6 @@
       "endpointTypeIndex": 1,
       "profileId": 259,
       "endpointId": 1,
-      "networkId": 0,
-      "parentEndpointIdentifier": null
-    },
-    {
-      "endpointTypeName": "MA-onofflight",
-      "endpointTypeIndex": 2,
-      "profileId": 259,
-      "endpointId": 2,
       "networkId": 0,
       "parentEndpointIdentifier": null
     }
