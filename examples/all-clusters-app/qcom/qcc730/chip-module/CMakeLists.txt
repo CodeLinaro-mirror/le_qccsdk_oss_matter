@@ -85,7 +85,7 @@ if(CONFIG_CHIP)
         #   SPAKE2+ ecp_mul x5:  ~14s SW  → ~0.3s  HW  (~47x)
         #   CASE ecdsa_sign:     ~5.5s SW → ~0.05s HW  (~110x)
         #   CASE ecdsa_verify x2:~13s SW  → ~0.1s  HW  (~130x)
-        #   AES-CCM / SHA256:    SW (~µs) — unchanged, no regression vs v1.0
+        #   AES-CCM / SHA256:    SW (~us) -- unchanged, no regression vs v1.0
         # zephyr_get_compile_flags() (called above) captures ALL Zephyr compile
         # flags including -DMBEDTLS_SHA256_ALT, -DMBEDTLS_AES_ALT, etc. set by
         # qcrypto/CMakeLists.txt via zephyr_compile_definitions(). We must
@@ -147,6 +147,7 @@ if(CONFIG_CHIP)
     matter_add_gn_arg_bool("chip_inet_config_enable_ipv4" CONFIG_CHIP_IPV4)
     matter_add_gn_arg_bool("chip_enable_wifi" CONFIG_WIFI)
     matter_add_gn_arg_bool("chip_config_network_layer_ble" CONFIG_BT)
+    matter_add_gn_arg_bool("chip_device_config_enable_wifipaf" CONFIG_WIFI_NM_WPA_SUPPLICANT_NAN_USD)
     matter_add_gn_arg_bool("chip_mdns_minimal" CONFIG_WIFI)
     matter_add_gn_arg_bool("chip_mdns_minimal" CONFIG_NET_L2_ETHERNET)
     matter_add_gn_arg_bool("chip_mdns_platform" CONFIG_NET_L2_OPENTHREAD)

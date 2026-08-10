@@ -20,6 +20,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/shell/shell.h>
 #include <app/server/Server.h>
+#include <platform/CHIPDeviceLayer.h>
+#include <platform/ConnectivityManager.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_CHIP_APP_LOG_LEVEL);
 // QCC730: override Zephyr's default sys_arch_reboot() which calls NVIC_SystemReset().
@@ -91,13 +93,54 @@ extern "C" struct getopt_state *getopt_state_get(void)
 // ---------------------------------------------------------------------------
 static int cmd_matter_reset(const struct shell * sh, size_t argc, char ** argv)
 {
-    shell_print(sh, "Matter factory reset requested — clearing NVS and rebooting...");
+    shell_print(sh, "Matter factory reset requested -- clearing NVS and rebooting...");
     chip::Server::GetInstance().ScheduleFactoryReset();
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Zephyr shell command: "matter start [freq_MHz]"
+// Starts WiFiPAF NAN publish on the specified frequency (default 2437 = CH6).
+// This allows testing commissioning on non-default channels, e.g.:
+//   matter start        → publish on 2437 MHz (CH6, default)
+//   matter start 2437   → publish on 2437 MHz (CH6)
+//   matter start 2442   → publish on 2442 MHz (CH7)
+//   matter start 2462   → publish on 2462 MHz (CH11)
+//   matter start 5745   → publish on 5745 MHz (CH149)
+// The commissioner must use the same frequency: --freq <MHz>
+// ---------------------------------------------------------------------------
+static int cmd_matter_start(const struct shell * sh, size_t argc, char ** argv)
+{
+    uint16_t freq = CHIP_DEVICE_CONFIG_WIFIPAF_24G_DEFAUTL_CHNL; // default 2437 MHz
+    if (argc >= 2) {
+        long val = atol(argv[1]);
+        if (val < 2412 || val > 6000) {
+            shell_error(sh, "Invalid frequency %ld -- must be 2412-5900 MHz", val);
+            return -EINVAL;
+        }
+        freq = (uint16_t) val;
+    }
+
+    ChipLogProgress(DeviceLayer, "WiFiPAF: starting NAN publish on freq=%u MHz", freq);
+
+    // Set the publish channel before calling WiFiPAFPublish.
+    chip::DeviceLayer::ConnectivityMgr().WiFiPafSetApFreq(freq);
+
+    chip::DeviceLayer::ConnectivityManager::WiFiPAFAdvertiseParam args;
+    args.enable        = true;
+    args.freq_list_len = 0;
+    CHIP_ERROR err = chip::DeviceLayer::ConnectivityMgr().WiFiPAFPublish(args);
+    if (err != CHIP_NO_ERROR) {
+        shell_error(sh, "WiFiPAF: NAN publish FAILED err=%d", (int) err.AsInteger());
+        return -EIO;
+    }
+    ChipLogProgress(DeviceLayer, "WiFiPAF: NAN publish started publish_id=%u", (unsigned) args.publish_id);
     return 0;
 }
 
 SHELL_STATIC_SUBCMD_SET_CREATE(matter_cmds,
     SHELL_CMD(reset, NULL, "Factory reset Matter stack (clears NVS, reboots)", cmd_matter_reset),
+    SHELL_CMD_ARG(start, NULL, "Start WiFiPAF NAN publish [freq_MHz] (default 2437)", cmd_matter_start, 1, 1),
     SHELL_SUBCMD_SET_END
 );
 SHELL_CMD_REGISTER(matter, &matter_cmds, "Matter commands", NULL);

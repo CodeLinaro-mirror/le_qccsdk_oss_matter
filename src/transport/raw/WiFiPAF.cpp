@@ -55,7 +55,7 @@ CHIP_ERROR WiFiPAFBase::SendMessage(const Transport::PeerAddress & address, Pack
         /*
             The session does not exist
         */
-        ChipLogError(Inet, "WiFi-PAF: No valid session whose nodeId: %lu", address.GetRemoteId());
+        ChipLogError(Inet, "WiFi-PAF: No valid session whose nodeId: %llu", address.GetRemoteId());
         return CHIP_ERROR_INCORRECT_STATE;
     }
     mWiFiPAFLayer->SendMessage(*pTxInfo, std::move(msgBuf));
@@ -82,6 +82,14 @@ CHIP_ERROR WiFiPAFBase::WiFiPAFMessageReceived(WiFiPAFSession & RxInfo, PacketBu
         */
         ChipLogError(Inet, "WiFi-PAF: No valid session whose Id: %u", RxInfo.id);
         return CHIP_ERROR_INCORRECT_STATE;
+    }
+
+    // Publisher sessions start with peer_id=kUndefinedWiFiPafSessionId.
+    // Accept the first incoming connection and lock in the subscriber's peer info.
+    if (pPafInfo->peer_id == kUndefinedWiFiPafSessionId)
+    {
+        pPafInfo->peer_id = RxInfo.peer_id;
+        memcpy(pPafInfo->peer_addr, RxInfo.peer_addr, sizeof(pPafInfo->peer_addr));
     }
 
     if ((pPafInfo->id != RxInfo.id) || (pPafInfo->peer_id != RxInfo.peer_id) ||
