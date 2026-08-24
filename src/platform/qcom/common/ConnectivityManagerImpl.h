@@ -144,6 +144,13 @@ private:
     bool mWiFiPAFEndpointCreated = false;
 #endif // CHIP_DEVICE_CONFIG_ENABLE_WIFI && CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
 
+    /* ICD SIT: BMPS polling interval is managed by ICDStateObserver (AppTask).
+     * ConnectivityManager just needs to satisfy the interface requirement. */
+    CHIP_ERROR _SetPollingInterval(chip::System::Clock::Milliseconds32 /* pollingInterval */)
+    {
+        return CHIP_NO_ERROR;
+    }
+
     friend ConnectivityManager & ConnectivityMgr(void);
     friend ConnectivityManagerImpl & ConnectivityMgrImpl(void);
 

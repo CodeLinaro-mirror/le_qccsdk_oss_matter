@@ -1,0 +1,86 @@
+/*
+ * Copyright (c) 2024 Project CHIP Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/ {
+	chosen {
+		zephyr,settings-partition = &storage_partition;
+	};
+
+	/* GPIO PA8: QCC730 notifies Host that ring data is ready (ring_send toggles) */
+	gpio_qcspi {
+		compatible = "gpio-qcspi";
+		status = "okay";
+		out-gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>;
+	};
+
+	aliases {
+		gpio-qcspi = &gpioa;
+	};
+
+	/* Ring ctrl block fixed at RRAM 0x9FC00 (0x400 bytes).
+	 * ring_service_qcc730.c places g_ring_ctrl_block in .ring_ctrl section.
+	 * modules/hal/qcom/qring/src/ring.ld maps .ring_ctrl to this region. */
+	ring_ctrl_ram: memory@9fc00 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x9FC00 0x400>;
+		zephyr,memory-region = "RING_CTRL_RAM";
+	};
+};
+
+/* Shrink sram0 to exclude the ring ctrl block region at top of RRAM */
+&sram0 {
+	reg = <0x10000 0x8FC00>;
+};
+
+/* Limit app flash region to avoid overwriting REGDB @ 0x373000.
+ * DTS default is 0x15DC00 (1399 KB) which extends past REGDB.
+ * Actual limit: 0x373000 - 0x222400 = 0x150C00 (1316 KB).
+ * With this override the linker will error if the app exceeds this. */
+&rram {
+	reg = <0x00222400 0x00150C00>;
+};
+
+&gpioa {
+	status = "okay";
+};
+
+&qcspi {
+	status = "okay";
+};
+
+/*
+ * The QCC730MI dev kit uses qspi_nor_flash3 (GT25Q32AU, 4MB) by default.
+ * We define a fixed partition table here to allocate space for Matter's
+ * non-volatile storage (NVS) at the end of the flash.
+ */
+&qspi_nor_flash3 {
+	status = "okay";
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/*
+		 * Enlarged NVS storage partition — 64KB (was 32KB).
+		 * Matches CONFIG_SETTINGS_NVS_SECTOR_COUNT=16 in prj.conf.
+		 */
+		storage_partition: partition@3f0000 {
+			label = "storage";
+			reg = <0x003f0000 0x00010000>;
+		};
+	};
+};
