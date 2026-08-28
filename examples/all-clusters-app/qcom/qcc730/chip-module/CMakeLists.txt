@@ -186,6 +186,33 @@ if(CONFIG_CHIP)
 
     matter_generate_args_tmp_file()
 
+    # Apply QCC730 platform patches to common Matter files.
+    # Patches live in src/platform/qcom/patches/ and are applied once per build
+    # (git apply --check ensures idempotency — skips if already applied).
+    set(QCOM_PATCHES_DIR "${CHIP_ROOT}/src/platform/qcom/patches")
+    file(GLOB QCOM_PATCH_FILES "${QCOM_PATCHES_DIR}/*.patch")
+    foreach(patch ${QCOM_PATCH_FILES})
+        execute_process(
+            COMMAND git apply --check "${patch}"
+            WORKING_DIRECTORY "${CHIP_ROOT}"
+            RESULT_VARIABLE patch_check_result
+            OUTPUT_QUIET ERROR_QUIET
+        )
+        if(patch_check_result EQUAL 0)
+            execute_process(
+                COMMAND git apply "${patch}"
+                WORKING_DIRECTORY "${CHIP_ROOT}"
+                RESULT_VARIABLE patch_result
+            )
+            if(NOT patch_result EQUAL 0)
+                message(FATAL_ERROR "Failed to apply patch: ${patch}")
+            endif()
+            message(STATUS "Applied QCC730 patch: ${patch}")
+        else()
+            message(STATUS "Skipping already-applied patch: ${patch}")
+        endif()
+    endforeach()
+
     matter_build(chip
         LIB_SHELL ${CONFIG_CHIP_LIB_SHELL}
         LIB_TESTS ${CONFIG_CHIP_BUILD_TESTS}
