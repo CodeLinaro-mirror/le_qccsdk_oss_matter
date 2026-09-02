@@ -66,4 +66,6 @@
 // only out-of-box commissioning transport.
 // Must match GN flag chip_device_config_enable_wifipaf = true in args.gni.
 // ---------------------------------------------------------------------------
+#ifndef CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
 #define CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF 1
+#endif

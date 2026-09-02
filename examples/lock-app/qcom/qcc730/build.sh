@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CHIP_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CHIP_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 BOARD="qcc730mi"
 BUILD_DIR="$SCRIPT_DIR/build"
 
