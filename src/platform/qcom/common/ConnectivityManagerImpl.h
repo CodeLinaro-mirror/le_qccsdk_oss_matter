@@ -42,9 +42,18 @@
 #include <platform/internal/GenericConnectivityManagerImpl_TCP.h>
 #endif
 
-// WiFi support via the generic Zephyr WiFi layer (net_mgmt / WiFiManager).
+// WiFi support via qcom's forked Zephyr WiFi layer (net_mgmt / WiFiManager).
+// Forked from ../../Zephyr/wifi/ into qcom/common/wifi/ because QCC730 needs
+// QCC730-specific changes (channelHint parameter, NAN single-radio concurrency
+// calls) that must not contaminate files shared with nRF Connect / Telink builds.
+// See BUILD.gn for the corresponding source-file rerouting.
 #if CHIP_DEVICE_CONFIG_ENABLE_WIFI
-#include <platform/Zephyr/wifi/ConnectivityManagerImplWiFi.h>
+#include "wifi/ConnectivityManagerImplWiFi.h"
+#endif
+
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+#include <wifipaf/WiFiPAFLayer.h>
+#include <wifipaf/WiFiPAFRole.h>
 #endif
 
 #include <lib/support/logging/CHIPLogging.h>
@@ -84,9 +93,63 @@ class ConnectivityManagerImpl final
 {
     friend class ConnectivityManager;
 
+public:
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI && CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+    void WiFiPafCancelActivePublish();
+    uint16_t WiFiPafGetApFreq() const { return mApFreq; }
+#endif
+
 private:
     CHIP_ERROR _Init(void);
     void _OnPlatformEvent(const ChipDeviceEvent * event);
+
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFI && CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+    // -- WiFi-PAF (NAN USD) commissioning ------------------------------------
+    // QCC730 is a commissionee (Publisher).  Subscriber-side methods are
+    // intentionally stubbed -- this platform has no BLE and is never a
+    // commissioner.
+
+    CHIP_ERROR _WiFiPAFPublish(ConnectivityManager::WiFiPAFAdvertiseParam & args);
+    CHIP_ERROR _WiFiPAFCancelPublish(uint32_t PublishId);
+
+    // Subscriber side -- not used on a commissionee, stub to NOT_IMPLEMENTED.
+    CHIP_ERROR _WiFiPAFSubscribe(const uint16_t & connDiscriminator, void * appState,
+                                 OnConnectionCompleteFunct onSuccess,
+                                 OnConnectionErrorFunct onError);
+    CHIP_ERROR _WiFiPAFCancelSubscribe(uint32_t SubscribeId);
+    CHIP_ERROR _WiFiPAFCancelIncompleteSubscribe();
+
+    CHIP_ERROR _WiFiPAFSend(const WiFiPAF::WiFiPAFSession & TxInfo,
+                             chip::System::PacketBufferHandle && msgBuf);
+    CHIP_ERROR _WiFiPAFShutdown(uint32_t id, WiFiPAF::WiFiPafRole role);
+
+    // Always true -- QCC730 has dedicated NAN hardware via qcom_wifi_drv.
+    bool _WiFiPAFResourceAvailable() { return true; }
+
+    // Store the commissioner's AP frequency so _WiFiPAFPublish can use the
+    // same channel.  0 = use default 2437 MHz (CH6).
+    void _WiFiPafSetApFreq(const uint16_t freq) { mApFreq = freq; }
+
+    // C-compatible callback registered with qcc730_nan_de_glue.
+    // Called from the hostap eloop thread; must PostEventOrDie() before
+    // touching any Matter APIs.
+    static void OnNanReceiveCallback(int id, int peer_instance_id,
+                                     const uint8_t * ssi, size_t ssi_len,
+                                     const uint8_t * peer_addr);
+
+    uint16_t mApFreq = 0;
+    uint32_t mPublishId = 0;        // active NAN publish id; 0 = none
+    // True once the WiFiPAFEndPoint has been created for the active publish session.
+    // Reset in _WiFiPAFShutdown so a new commissioning cycle creates a fresh endpoint.
+    bool mWiFiPAFEndpointCreated = false;
+#endif // CHIP_DEVICE_CONFIG_ENABLE_WIFI && CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+
+    /* ICD SIT: BMPS polling interval is managed by ICDStateObserver (AppTask).
+     * ConnectivityManager just needs to satisfy the interface requirement. */
+    CHIP_ERROR _SetPollingInterval(chip::System::Clock::Milliseconds32 /* pollingInterval */)
+    {
+        return CHIP_NO_ERROR;
+    }
 
     friend ConnectivityManager & ConnectivityMgr(void);
     friend ConnectivityManagerImpl & ConnectivityMgrImpl(void);

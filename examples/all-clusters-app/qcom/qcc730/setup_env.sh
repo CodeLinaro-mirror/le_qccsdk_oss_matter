@@ -17,7 +17,7 @@
 #       remain in the calling shell:  source setup_env.sh  or  . setup_env.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CHIP_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CHIP_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 
 echo "========================================"
 echo "Setting up QCC730 Matter Build Environment"

@@ -31,7 +31,11 @@
 
 #pragma once
 
-#include <platform/Zephyr/wifi/ZephyrWifiDriver.h>
+// Include the qcom-forked copy (common/wifi/) instead of the shared
+// Zephyr path (platform/Zephyr/wifi/), to pick up QCC730-specific changes
+// (channelHint parameter, NAN single-radio concurrency calls) without
+// affecting nRF Connect / Telink builds. See BUILD.gn for the rerouting.
+#include "../../common/wifi/ZephyrWifiDriver.h"
 
 namespace chip {
 namespace DeviceLayer {

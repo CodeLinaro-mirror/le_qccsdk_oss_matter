@@ -27,7 +27,7 @@
 #include <platform/PlatformManager.h>
 #include <data-model-providers/codegen/Instance.h>
 #include <app/clusters/network-commissioning/network-commissioning.h>
-#include <platform/Zephyr/wifi/ZephyrWifiDriver.h>
+#include <platform/qcom/common/wifi/ZephyrWifiDriver.h>
 #include <lib/support/CHIPMem.h>
 #include <setup_payload/OnboardingCodesUtil.h>
 
@@ -169,7 +169,14 @@ CHIP_ERROR AppTask::Init()
         return err;
     }
 
-    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kOnNetwork));
+    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kWiFiPAF));
+
+#if CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+    // NAN publish is started on demand via the "matter start [freq_MHz]" shell
+    // command rather than automatically on boot, to avoid channel conflicts when
+    // a non-default publish frequency is needed.
+    printk("WiFiPAF: ready -- use 'matter start [freq]' to begin NAN publish\n");
+#endif // CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
 
     // Start the CHIP event loop.
     err = PlatformMgr().StartEventLoopTask();

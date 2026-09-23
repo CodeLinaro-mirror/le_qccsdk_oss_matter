@@ -72,17 +72,28 @@ static_library("qcom") {
     "${chip_root}/src/platform/logging:headers",
   ]
 
-  # WiFi support: reuse the generic Zephyr WiFi layer plus the QCC730 driver wrapper.
+  # WiFi support: forked from ../Zephyr/wifi/ into qcom's own tree (see below).
   if (chip_enable_wifi) {
     sources += [
-      "../Zephyr/wifi/ConnectivityManagerImplWiFi.cpp",
-      "../Zephyr/wifi/ConnectivityManagerImplWiFi.h",
-      "../Zephyr/wifi/DiagnosticDataProviderImplWiFi.cpp",
-      "../Zephyr/wifi/DiagnosticDataProviderImplWiFi.h",
-      "../Zephyr/wifi/WiFiManager.cpp",
-      "../Zephyr/wifi/WiFiManager.h",
-      "../Zephyr/wifi/ZephyrWifiDriver.cpp",
-      "../Zephyr/wifi/ZephyrWifiDriver.h",
+      # Forked from ../Zephyr/wifi/ into qcom's own tree so QCC730
+      # WiFiPAF/NAN customizations (channelHint, NAN scan suppression, etc.)
+      # don't live in the Zephyr-common WiFiManager/ZephyrWifiDriver shared by
+      # nRF Connect and Telink. See BUILD.gn comment above for details.
+      #
+      # ConnectivityManagerImplWiFi/DiagnosticDataProviderImplWiFi carry no
+      # QCC730-specific changes themselves, but they #include "WiFiManager.h"
+      # by quoted/absolute path — leaving them in ../Zephyr/wifi/ would resolve
+      # that include to the *upstream* WiFiManager.h, creating two distinct
+      # WiFiManager class definitions (ODR violation) linked into one binary.
+      # They must move together with WiFiManager/ZephyrWifiDriver.
+      "common/wifi/ConnectivityManagerImplWiFi.cpp",
+      "common/wifi/ConnectivityManagerImplWiFi.h",
+      "common/wifi/DiagnosticDataProviderImplWiFi.cpp",
+      "common/wifi/DiagnosticDataProviderImplWiFi.h",
+      "common/wifi/WiFiManager.cpp",
+      "common/wifi/WiFiManager.h",
+      "common/wifi/ZephyrWifiDriver.cpp",
+      "common/wifi/ZephyrWifiDriver.h",
       "QCC730/wifi/QComWifiDriver.h",
     ]
   } else {
@@ -98,6 +109,14 @@ static_library("qcom") {
       "../Zephyr/OTAImageProcessorImpl.cpp",
       "../Zephyr/OTAImageProcessorImpl.h",
     ]
+  }
+
+  # WiFi-PAF (NAN USD) commissioning — QCC730 has no BLE, NAN USD is
+  # the out-of-box transport. public_deps so the dep propagates to
+  # //src/platform:platform (via _platform_target) and transitively satisfies
+  # //src/transport/raw:raw which also pulls WiFiPAF.h under the same flag.
+  if (chip_device_config_enable_wifipaf) {
+    public_deps += [ "${chip_root}/src/wifipaf" ]
   }
 
   cflags = [

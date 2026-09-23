@@ -60,3 +60,12 @@
 #ifndef CHIP_DEVICE_CONFIG_CHIP_TASK_STACK_SIZE
 #define CHIP_DEVICE_CONFIG_CHIP_TASK_STACK_SIZE (8 * 1024)
 #endif
+
+// ---------------------------------------------------------------------------
+// WiFi-PAF (NAN USD) commissioning — QCC730 has no BLE; NAN USD is the
+// only out-of-box commissioning transport.
+// Must match GN flag chip_device_config_enable_wifipaf = true in args.gni.
+// ---------------------------------------------------------------------------
+#ifndef CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
+#define CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF 1
+#endif
